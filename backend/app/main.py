@@ -1,11 +1,11 @@
 from fastapi import FastAPI
+from app.routers import health, simulation
 
-app = FastAPI()
+app = FastAPI(title="DecisionTwin API")
+
+app.include_router(health.router)
+app.include_router(simulation.router)
 
 @app.get("/")
-def home():
+def root():
     return {"message": "DecisionTwin Backend Running"}
-
-@app.get("/healthz")
-def health():
-    return {"status": "ok"}
