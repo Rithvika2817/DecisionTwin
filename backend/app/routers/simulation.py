@@ -1,10 +1,13 @@
 from fastapi import APIRouter
+from app.schemas.simulation_schema import SimulationResult
 
-router = APIRouter(prefix="/simulate", tags=["Simulation"])
+router = APIRouter()
 
-@router.get("/")
+
+@router.get("/simulate/", response_model=SimulationResult)
 def run_simulation():
-    return {
-        "message": "Simulation endpoint ready",
-        "status": "waiting for ML integration"
-    }
+    return SimulationResult(
+        simulation_id=1,
+        result="Simulation endpoint ready",
+        score=85.5
+    )
