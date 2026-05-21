@@ -1,6 +1,5 @@
 from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
-from app.routers import health, simulation, upload
+from app.routers import health, simulation, upload, analyze
 
 app = FastAPI(title="DecisionTwin API")
 
@@ -8,9 +7,7 @@ app = FastAPI(title="DecisionTwin API")
 app.include_router(health.router)
 app.include_router(simulation.router)
 app.include_router(upload.router)
-
-# Serve uploaded files
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+app.include_router(analyze.router)
 
 @app.get("/")
 def root():
