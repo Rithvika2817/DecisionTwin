@@ -1,53 +1,47 @@
 from fastapi import APIRouter, UploadFile, File
+import pandas as pd
 import os
-import shutil
 
 router = APIRouter()
 
 UPLOAD_FOLDER = "uploads"
-
-# Create uploads folder if not exists
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# Store uploaded datasets
+dataset_store = {}
 
 
 @router.post("/datasets/upload")
 async def upload_dataset(file: UploadFile = File(...)):
-    file_path = f"{UPLOAD_FOLDER}/{file.filename}"
+    file_path = os.path.join(UPLOAD_FOLDER, file.filename)
 
     with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+        buffer.write(await file.read())
+
+    dataset_id = len(dataset_store) + 1
+    dataset_store[dataset_id] = file_path
 
     return {
         "status": "success",
-        "dataset_id": 1,
+        "dataset_id": dataset_id,
         "filename": file.filename,
         "message": "Dataset uploaded successfully"
     }
 
 
 @router.get("/datasets/{dataset_id}/preview")
-async def preview_dataset(dataset_id: int):
+def preview_dataset(dataset_id: int):
+
+    if dataset_id not in dataset_store:
+        return {"error": "Dataset not found"}
+
+    file_path = dataset_store[dataset_id]
+
+    df = pd.read_csv(file_path)
+
     return {
         "status": "success",
         "dataset_id": dataset_id,
-        "columns": [
-            "Transaction_ID",
-            "Amount",
-            "Merchant",
-            "Risk_Score"
-        ],
-        "preview": [
-            {
-                "Transaction_ID": 101,
-                "Amount": 5000,
-                "Merchant": "Amazon",
-                "Risk_Score": "Low"
-            },
-            {
-                "Transaction_ID": 102,
-                "Amount": 12000,
-                "Merchant": "Flipkart",
-                "Risk_Score": "Medium"
-            }
-        ]
+        "columns": list(df.columns),
+        "preview": df.head(5).to_dict(orient="records")
     }

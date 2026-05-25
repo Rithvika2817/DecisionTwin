@@ -19,3 +19,12 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Uploads / Datasets
+backend/uploads/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Python cache
+.pytest_cache/
