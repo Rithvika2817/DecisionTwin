@@ -6,37 +6,38 @@ import joblib
 model = joblib.load("fraud_model.pkl")
 
 
-def load_dataset():
-    file_path = "uploads/creditcard.csv"
+from app.routers.datasets import dataset_store
+
+def load_dataset(dataset_id):
+
+    if dataset_id not in dataset_store:
+        return None
+
+    file_path = dataset_store[dataset_id]
 
     if not os.path.exists(file_path):
         return None
 
-    df = pd.read_csv(file_path)
-    return df
+    return pd.read_csv(file_path)
 
 
 # Week 3 Analytics Function
-def get_baseline_metrics():
-    df = load_dataset()
+def get_baseline_metrics(dataset_id):
+    df = load_dataset(dataset_id)
 
     if df is None:
         return {"error": "Dataset not found"}
 
-    total_transactions = len(df)
-    fraud_cases = len(df[df["Class"] == 1])
-    normal_cases = len(df[df["Class"] == 0])
+    total_rows = len(df)
 
-    fraud_percentage = round(
-        (fraud_cases / total_transactions) * 100,
-        2
-    )
+    total_revenue = 0
+
+    if "revenue" in df.columns:
+        total_revenue = float(df["revenue"].sum())
 
     return {
-        "total_transactions": total_transactions,
-        "fraud_cases": fraud_cases,
-        "normal_cases": normal_cases,
-        "fraud_percentage": fraud_percentage
+        "total_rows": total_rows,
+        "total_revenue": total_revenue
     }
 
 
